@@ -1,10 +1,12 @@
-res = 4
+res = 6
 
-SW = 160 * res
-SH = 120 * res
+SW = 160
+SH = 120
+WW = 160 * res
+WH = 120 * res
 SW2 = (SW / 2)
 SH2 = (SH / 2)
-pixelScale = 4 / res
+--pixelScale = 4 / res
 
 
 function love.conf(t)
