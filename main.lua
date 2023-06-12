@@ -15,6 +15,134 @@ local player = {
 }
 
 local walls = {
+    --RED
+    {
+        x1 = 0,
+        y1 = 0,
+        x2 = 32,
+        y2 = 0,
+        c = 1
+    },
+
+    {
+        x1 = 32,
+        y1 = 0,
+        x2 = 32,
+        y2 = 32,
+        c = 2
+    },
+    {
+        x1 = 32,
+        y1 = 32,
+        x2 = 0,
+        y2 = 32,
+        c = 1
+    },
+    {
+        x1 = 0,
+        y1 = 32,
+        x2 = 0,
+        y2 = 0,
+        c = 2
+    },
+    --GREEN
+    {
+        x1 = 64,
+        y1 = 0,
+        x2 = 96,
+        y2 = 0,
+        c = 3
+    },
+
+    {
+        x1 = 96,
+        y1 = 0,
+        x2 = 96,
+        y2 = 32,
+        c = 4
+    },
+    {
+        x1 = 96,
+        y1 = 32,
+        x2 = 64,
+        y2 = 32,
+        c = 3
+    },
+    {
+        x1 = 64,
+        y1 = 32,
+        x2 = 64,
+        y2 = 0,
+        c = 4
+    },
+    --BLUE
+    {
+        x1 = 64,
+        y1 = 64,
+        x2 = 96,
+        y2 = 64,
+        c = 5
+    },
+
+    {
+        x1 = 96,
+        y1 = 64,
+        x2 = 96,
+        y2 = 96,
+        c = 6
+    },
+
+    {
+        x1 = 96,
+        y1 = 96,
+        x2 = 64,
+        y2 = 96,
+        c = 5
+    },
+    {
+        x1 = 64,
+        y1 = 96,
+        x2 = 64,
+        y2 = 64,
+        c = 6
+    },
+    --WHITE
+    {
+        x1 = 0,
+        y1 = 64,
+        x2 = 32,
+        y2 = 64,
+        c = 7
+    },
+
+    {
+        x1 = 32,
+        y1 = 64,
+        x2 = 32,
+        y2 = 96,
+        c = 8
+    },
+
+    {
+        x1 = 32,
+        y1 = 96,
+        x2 = 0,
+        y2 = 96,
+        c = 7
+    },
+    {
+        x1 = 0,
+        y1 = 96,
+        x2 = 0,
+        y2 = 64,
+        c = 8
+    },
+}
+
+--[[
+
+local walls = {
+    --RED
     {
         x1 = 0,
         y1 = 0,
@@ -30,7 +158,21 @@ local walls = {
         y2 = 0,
         c = 2
     },
-
+    {
+        x1 = 100,
+        y1 = 0,
+        x2 = 100,
+        y2 = 100,
+        c = 1
+    },
+    {
+        x1 = 100,
+        y1 = 100,
+        x2 = 0,
+        y2 = 100,
+        c = 2
+    },
+    --GREEN
     {
         x1 = 0,
         y1 = 200,
@@ -46,7 +188,21 @@ local walls = {
         y2 = 200,
         c = 4
     },
-
+    {
+        x1 = 100,
+        y1 = 200,
+        x2 = 100,
+        y2 = 300,
+        c = 3
+    },
+    {
+        x1 = 100,
+        y1 = 300,
+        x2 = 0,
+        y2 = 300,
+        c = 4
+    },
+    --BLUE
     {
         x1 = 200,
         y1 = 0,
@@ -62,6 +218,22 @@ local walls = {
         y2 = 0,
         c = 6
     },
+
+    {
+        x1 = 300,
+        y1 = 0,
+        x2 = 300,
+        y2 = 100,
+        c = 5
+    },
+    {
+        x1 = 300,
+        y1 = 100,
+        x2 = 200,
+        y2 = 100,
+        c = 6
+    },
+    --WHITE
     {
         x1 = 200,
         y1 = 200,
@@ -78,12 +250,27 @@ local walls = {
         c = 8
     },
 
+    {
+        x1 = 300,
+        y1 = 200,
+        x2 = 300,
+        y2 = 300,
+        c = 7
+    },
+    {
+        x1 = 300,
+        y1 = 300,
+        x2 = 200,
+        y2 = 300,
+        c = 8
+    },
 }
+]]
 
 local sectors = {
     {
         ws = 1,
-        we = 2,
+        we = 4,
         z1 = 0,
         z2 = 40,
         d = 0,
@@ -93,8 +280,8 @@ local sectors = {
         surface = 0
     },
     {
-        ws = 3,
-        we = 4,
+        ws = 5,
+        we = 8,
         z1 = 0,
         z2 = 40,
         d = 0,
@@ -104,8 +291,8 @@ local sectors = {
         surface = 0
     },
     {
-        ws = 5,
-        we = 6,
+        ws = 9,
+        we = 12,
         z1 = 0,
         z2 = 40,
         d = 0,
@@ -115,8 +302,8 @@ local sectors = {
         surface = 0
     },
     {
-        ws = 7,
-        we = 8,
+        ws = 13,
+        we = 16,
         z1 = 0,
         z2 = 40,
         d = 0,
@@ -138,7 +325,7 @@ push:setupScreen(160, 120, WW, WH, {
 })
 
 function drawPixel(x, y, r, g, b, a)
-    --love.graphics.setColor(r, g, b, a)
+    love.graphics.setColor(love.math.colorFromBytes( r, g, b))
     love.graphics.points(x, y)
 end
 
@@ -165,9 +352,36 @@ function drawWall(x1, x2, b1, b2, t1, t2, s)
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
 
+        if sectors[s].surface == 1 then
+            sectors[s].surf[x] = y1
+            goto continue
+        end
+        if sectors[s].surface == 2 then
+            sectors[s].surf[x] = y2
+            goto continue
+        end
+
+        if sectors[s].surface == -1 then
+            if not (sectors[s].surf[x] == nil) then
+                for y = sectors[s].surf[x], y1 do
+                    drawPixel(x, y, 155, 155, 155, 1)
+                end
+            end
+        end
+        if sectors[s].surface == -2 then
+            if not (sectors[s].surf[x] == nil) then
+                for y = y2, sectors[s].surf[x] do
+                    drawPixel(x, y, 255, 0, 0, 1)
+                end
+            end
+        end
+
+
         for y = y1, y2 do
             drawPixel(x, y, 255, 255, 255, 1)
         end
+
+        ::continue::
     end
 end
 
@@ -199,11 +413,11 @@ function love.load()
     min_dt = 1 / 30
     next_time = love.timer.getTime()
 
-    player.x = 0
-    player.y = -500
-    player.z = 0
-    player.angle = 0
-    player.look = 0
+    player.x = 181
+    player.y = -85
+    player.z = -56
+    player.angle = 316
+    player.look = -11
 
     local sin = math.sin
     local cos = math.cos
@@ -279,12 +493,13 @@ end
 function love.draw()
     love.graphics.setColor(255, 0, 0, 1)
     love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 10)
-    push:start()
     local wx = {}
     local wy = {}
     local wz = {}
     local CS = cosLookUp[player.angle]
     local SN = sinLookUp[player.angle]
+
+    push:start()
 
     for s = 1, #sectors do
         for w = 1, #sectors - s do
@@ -306,30 +521,6 @@ function love.draw()
 
         for loop = 1, 2 do
             for i = sector.ws, sector.we do
-                if walls[i].c == 1 then
-                    love.graphics.setColor(love.math.colorFromBytes(255, 0, 0))
-                end
-                if walls[i].c == 2 then
-                    love.graphics.setColor(love.math.colorFromBytes(155, 0, 0))
-                end
-                if walls[i].c == 3 then
-                    love.graphics.setColor(love.math.colorFromBytes(0, 255, 0))
-                end
-                if walls[i].c == 4 then
-                    love.graphics.setColor(love.math.colorFromBytes(0, 155, 0))
-                end
-                if walls[i].c == 5 then
-                    love.graphics.setColor(love.math.colorFromBytes(0, 0, 255))
-                end
-                if walls[i].c == 6 then
-                    love.graphics.setColor(love.math.colorFromBytes(0, 0, 155))
-                end
-                if walls[i].c == 7 then
-                    love.graphics.setColor(love.math.colorFromBytes(255, 255, 255))
-                end
-                if walls[i].c == 8 then
-                    love.graphics.setColor(love.math.colorFromBytes(155, 155, 155))
-                end
 
                 local x1 = walls[i].x1 - player.x
                 local y1 = walls[i].y1 - player.y
@@ -386,9 +577,9 @@ function love.draw()
 
                     drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], secCount)
                 end
-                sector.d = sector.d / (sector.we - sector.ws)
-                sector.surface = sector.surface * -1
             end
+            sector.d = sector.d / (sector.we - sector.ws)
+            sector.surface = sector.surface * -1
         end
         secCount = secCount + 1
     end
