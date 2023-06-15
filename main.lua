@@ -1,10 +1,9 @@
 _G.love = require("love")
 io.stdout:setvbuf('no')
 
-local push = require "push"
-lick = require "lick"
+local push = require "lib/push"
+local lick = require "lib/lick"
 lick.reset = true -- reload love.load everytime you save
-
 
 local player = {
     x = 0,
@@ -19,136 +18,11 @@ local walls = {
     {
         x1 = 0,
         y1 = 0,
-        x2 = 32,
-        y2 = 0,
-        c = 1
-    },
-
-    {
-        x1 = 32,
-        y1 = 0,
-        x2 = 32,
-        y2 = 32,
-        c = 2
-    },
-    {
-        x1 = 32,
-        y1 = 32,
-        x2 = 0,
-        y2 = 32,
-        c = 1
-    },
-    {
-        x1 = 0,
-        y1 = 32,
-        x2 = 0,
-        y2 = 0,
-        c = 2
-    },
-    --GREEN
-    {
-        x1 = 64,
-        y1 = 0,
-        x2 = 96,
-        y2 = 0,
-        c = 3
-    },
-
-    {
-        x1 = 96,
-        y1 = 0,
-        x2 = 96,
-        y2 = 32,
-        c = 4
-    },
-    {
-        x1 = 96,
-        y1 = 32,
-        x2 = 64,
-        y2 = 32,
-        c = 3
-    },
-    {
-        x1 = 64,
-        y1 = 32,
-        x2 = 64,
-        y2 = 0,
-        c = 4
-    },
-    --BLUE
-    {
-        x1 = 64,
-        y1 = 64,
-        x2 = 96,
-        y2 = 64,
-        c = 5
-    },
-
-    {
-        x1 = 96,
-        y1 = 64,
-        x2 = 96,
-        y2 = 96,
-        c = 6
-    },
-
-    {
-        x1 = 96,
-        y1 = 96,
-        x2 = 64,
-        y2 = 96,
-        c = 5
-    },
-    {
-        x1 = 64,
-        y1 = 96,
-        x2 = 64,
-        y2 = 64,
-        c = 6
-    },
-    --WHITE
-    {
-        x1 = 0,
-        y1 = 64,
-        x2 = 32,
-        y2 = 64,
-        c = 7
-    },
-
-    {
-        x1 = 32,
-        y1 = 64,
-        x2 = 32,
-        y2 = 96,
-        c = 8
-    },
-
-    {
-        x1 = 32,
-        y1 = 96,
-        x2 = 0,
-        y2 = 96,
-        c = 7
-    },
-    {
-        x1 = 0,
-        y1 = 96,
-        x2 = 0,
-        y2 = 64,
-        c = 8
-    },
-}
-
---[[
-
-local walls = {
-    --RED
-    {
-        x1 = 0,
-        y1 = 0,
         x2 = 100,
         y2 = 0,
-        c = 1
+        r = 155,
+        g = 0,
+        b = 0
     },
 
     {
@@ -156,21 +30,27 @@ local walls = {
         y1 = 100,
         x2 = 0,
         y2 = 0,
-        c = 2
+        r = 255,
+        g = 0,
+        b = 0
     },
     {
         x1 = 100,
         y1 = 0,
         x2 = 100,
         y2 = 100,
-        c = 1
+        r = 255,
+        g = 0,
+        b = 0
     },
     {
         x1 = 100,
         y1 = 100,
         x2 = 0,
         y2 = 100,
-        c = 2
+        r = 155,
+        g = 0,
+        b = 0
     },
     --GREEN
     {
@@ -178,7 +58,9 @@ local walls = {
         y1 = 200,
         x2 = 100,
         y2 = 200,
-        c = 3
+        r = 0,
+        g = 155,
+        b = 0
     },
 
     {
@@ -186,21 +68,27 @@ local walls = {
         y1 = 300,
         x2 = 0,
         y2 = 200,
-        c = 4
+        r = 0,
+        g = 255,
+        b = 0
     },
     {
         x1 = 100,
         y1 = 200,
         x2 = 100,
         y2 = 300,
-        c = 3
+        r = 0,
+        g = 255,
+        b = 0
     },
     {
         x1 = 100,
         y1 = 300,
         x2 = 0,
         y2 = 300,
-        c = 4
+        r = 0,
+        g = 155,
+        b = 0
     },
     --BLUE
     {
@@ -208,7 +96,9 @@ local walls = {
         y1 = 0,
         x2 = 300,
         y2 = 0,
-        c = 5
+        r = 0,
+        g = 0,
+        b = 155
     },
 
     {
@@ -216,7 +106,9 @@ local walls = {
         y1 = 100,
         x2 = 200,
         y2 = 0,
-        c = 6
+        r = 0,
+        g = 0,
+        b = 255
     },
 
     {
@@ -224,14 +116,18 @@ local walls = {
         y1 = 0,
         x2 = 300,
         y2 = 100,
-        c = 5
+        r = 0,
+        g = 0,
+        b = 255
     },
     {
         x1 = 300,
         y1 = 100,
         x2 = 200,
         y2 = 100,
-        c = 6
+        r = 0,
+        g = 0,
+        b = 155
     },
     --WHITE
     {
@@ -239,7 +135,9 @@ local walls = {
         y1 = 200,
         x2 = 300,
         y2 = 200,
-        c = 7
+        r = 155,
+        g = 155,
+        b = 155
     },
 
     {
@@ -247,7 +145,9 @@ local walls = {
         y1 = 300,
         x2 = 200,
         y2 = 200,
-        c = 8
+        r = 255,
+        g = 255,
+        b = 255
     },
 
     {
@@ -255,17 +155,20 @@ local walls = {
         y1 = 200,
         x2 = 300,
         y2 = 300,
-        c = 7
+        r = 255,
+        g = 255,
+        b = 255
     },
     {
         x1 = 300,
         y1 = 300,
         x2 = 200,
         y2 = 300,
-        c = 8
+        r = 155,
+        g = 155,
+        b = 155
     },
 }
-]]
 
 local sectors = {
     {
@@ -274,32 +177,52 @@ local sectors = {
         z1 = 0,
         z2 = 40,
         d = 0,
-        c1 = 1,
-        c2 = 2,
         surf = {},
-        surface = 0
+        surface = 0,
+
+        r1 = 255,
+        g1 = 255,
+        b1 = 0,
+
+        r2 = 255,
+        g2 = 255,
+        b2 = 0,
     },
+
     {
         ws = 5,
         we = 8,
         z1 = 0,
         z2 = 40,
         d = 0,
-        c1 = 3,
-        c2 = 4,
         surf = {},
-        surface = 0
+        surface = 0,
+
+        r1 = 255,
+        g1 = 255,
+        b1 = 0,
+
+        r2 = 255,
+        g2 = 255,
+        b2 = 0,
     },
+
     {
         ws = 9,
         we = 12,
         z1 = 0,
         z2 = 40,
         d = 0,
-        c1 = 5,
-        c2 = 6,
         surf = {},
-        surface = 0
+        surface = 0,
+
+        r1 = 255,
+        g1 = 255,
+        b1 = 0,
+
+        r2 = 255,
+        g2 = 255,
+        b2 = 0,
     },
     {
         ws = 13,
@@ -307,16 +230,22 @@ local sectors = {
         z1 = 0,
         z2 = 40,
         d = 0,
-        c1 = 7,
-        c2 = 8,
         surf = {},
-        surface = 0
-    }
+        surface = 0,
 
+        r1 = 255,
+        g1 = 255,
+        b1 = 0,
+
+        r2 = 255,
+        g2 = 255,
+        b2 = 0,
+    }
 }
 
 local cosLookUp = {}
 local sinLookUp = {}
+
 
 push:setupScreen(160, 120, WW, WH, {
     fullscreen = false,
@@ -324,12 +253,12 @@ push:setupScreen(160, 120, WW, WH, {
     pixelperfect = true
 })
 
-function drawPixel(x, y, r, g, b, a)
-    love.graphics.setColor(love.math.colorFromBytes( r, g, b))
+function drawPixel(x, y, r, g, b)
+    love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
 end
 
-function drawWall(x1, x2, b1, b2, t1, t2, s)
+function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
     local dyb = b2 - b1
     local dyt = t2 - t1
     local dx = x2 - x1
@@ -338,19 +267,19 @@ function drawWall(x1, x2, b1, b2, t1, t2, s)
 
     local xs = x1
 
-    if x1 < 0 then x1 = 0 end
-    if x2 < 0 then x2 = 0 end
-    if x1 > SW then x1 = SW end
-    if x2 > SW then x2 = SW end
+    if x1 < 1 then x1 = 1 end
+    if x2 < 1 then x2 = 1 end
+    if x1 > SW - 1 then x1 = SW - 1 end
+    if x2 > SW - 1 then x2 = SW - 1 end
 
     for x = x1, x2, 1 do
         local y1 = dyb * (x - xs + 0.5) / dx + b1
         local y2 = dyt * (x - xs + 0.5) / dx + t1
 
-        if y1 < 0 then y1 = 1 end
-        if y2 < 0 then y2 = 1 end
-        if y1 > SH then y1 = SH end
-        if y2 > SH then y2 = SH end
+        if y1 < 1 then y1 = 1 end
+        if y2 < 1 then y2 = 1 end
+        if y1 > SH - 1 then y1 = SH - 1 end
+        if y2 > SH - 1 then y2 = SH - 1 end
 
         if sectors[s].surface == 1 then
             sectors[s].surf[x] = y1
@@ -364,23 +293,21 @@ function drawWall(x1, x2, b1, b2, t1, t2, s)
         if sectors[s].surface == -1 then
             if not (sectors[s].surf[x] == nil) then
                 for y = sectors[s].surf[x], y1 do
-                    drawPixel(x, y, 155, 155, 155, 1)
+                    drawPixel(x, y, sectors[s].r1, sectors[s].g1, sectors[s].b1)
                 end
             end
         end
         if sectors[s].surface == -2 then
             if not (sectors[s].surf[x] == nil) then
                 for y = y2, sectors[s].surf[x] do
-                    drawPixel(x, y, 255, 0, 0, 1)
+                    drawPixel(x, y, sectors[s].r2, sectors[s].g2, sectors[s].b2)
                 end
             end
         end
 
-
         for y = y1, y2 do
-            drawPixel(x, y, 255, 255, 255, 1)
+            drawPixel(x, y, r, g, b)
         end
-
         ::continue::
     end
 end
@@ -403,8 +330,7 @@ function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
 end
 
 function dist(x1, y1, x2, y2)
-    local distance = math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
-    return distance;
+    return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 end
 
 function love.load()
@@ -413,9 +339,10 @@ function love.load()
     min_dt = 1 / 30
     next_time = love.timer.getTime()
 
-    player.x = 181
-    player.y = -85
-    player.z = -56
+
+    player.x = 617
+    player.y = -318
+    player.z = -204
     player.angle = 316
     player.look = -11
 
@@ -433,14 +360,14 @@ function love.update(dt)
 
     --look left/right
     if love.keyboard.isDown("j") then
-        player.angle = player.angle - 4
+        player.angle = player.angle - 2
         if player.angle < 0 then
             player.angle = player.angle + 360
         end
     end
 
     if love.keyboard.isDown("l") then
-        player.angle = player.angle + 4
+        player.angle = player.angle + 2
         if player.angle > 359 then
             player.angle = player.angle - 360
         end
@@ -501,6 +428,7 @@ function love.draw()
 
     push:start()
 
+    --order sectors by distance
     for s = 1, #sectors do
         for w = 1, #sectors - s do
             if sectors[w].d < sectors[w + 1].d then
@@ -511,23 +439,24 @@ function love.draw()
         end
     end
 
-    local secCount = 1
-    for _, sector in ipairs(sectors) do
-        sector.d = 0
+    --draw sectors
+    for s = 1, #sectors do
+        sectors[s].d = 0 --clear distance
+        sectors[s].surf = {}
 
-        sector.surface = 0
-        if player.z < sector.z1 then sector.surface = 1 end
-        if player.z > sector.z2 then sector.surface = 2 end
+        sectors[s].surface = 0                                      -- no surface
+        if player.z < sectors[s].z1 then sectors[s].surface = 1 end --top surface
+        if player.z > sectors[s].z2 then sectors[s].surface = 2 end --bottom surface
 
         for loop = 1, 2 do
-            for i = sector.ws, sector.we do
-
+            for i = sectors[s].ws, sectors[s].we do
+                --offset bottom 2 points by player
                 local x1 = walls[i].x1 - player.x
                 local y1 = walls[i].y1 - player.y
-
                 local x2 = walls[i].x2 - player.x
                 local y2 = walls[i].y2 - player.y
 
+                --swap for surface
                 if loop == 1 then
                     swp = x1
                     x1 = x2
@@ -537,51 +466,58 @@ function love.draw()
                     y2 = swp
                 end
 
+                --World x position
                 wx[0] = x1 * CS - y1 * SN
                 wx[1] = x2 * CS - y2 * SN
                 wx[2] = wx[0]
                 wx[3] = wx[1]
 
+                --World y position
                 wy[0] = y1 * CS + x1 * SN
                 wy[1] = y2 * CS + x2 * SN
                 wy[2] = wy[0]
                 wy[3] = wy[1]
 
-                sector.d = sector.d + dist(0, 0, (wx[0] + wx[1]) / 2, (wy[0] + wy[1]) / 2)
+                -- wall distance from player
+                sectors[s].d = sectors[s].d + dist(0, 0, (wx[0] + wx[1]) / 2, (wy[0] + wy[1]) / 2)
 
-                wz[0] = sector.z1 * -1 - player.z + (player.look * wy[0] / 32)
-                wz[1] = sector.z1 * -1 - player.z + (player.look * wy[1] / 32)
+                --World z height
+                wz[0] = sectors[s].z1 - player.z + (player.look * wy[0] / 32.0)
+                wz[1] = sectors[s].z1 - player.z + (player.look * wy[1] / 32.0)
+                wz[2] = wz[0] + sectors[s].z2
+                wz[3] = wz[1] + sectors[s].z2
 
-                wz[2] = wz[0] + sector.z2
-                wz[3] = wz[1] + sector.z2
-
+                --dont draw if behind player
                 if not (wy[0] < 1 and wy[1] < 1) then
+                    --point 1 behind player, clip
                     if wy[0] < 1 then
                         wx[0], wy[0], wz[0] = clipBehindPlayer(wx[0], wy[0], wz[0], wx[1], wy[1], wz[1])
                         wx[2], wy[2], wz[2] = clipBehindPlayer(wx[2], wy[2], wz[2], wx[3], wy[3], wz[3])
                     end
+                    --point 2 behind player, clip
                     if wy[1] < 1 then
                         wx[1], wy[1], wz[1] = clipBehindPlayer(wx[1], wy[1], wz[1], wx[0], wy[0], wz[0])
                         wx[3], wy[3], wz[3] = clipBehindPlayer(wx[3], wy[3], wz[3], wx[2], wy[2], wz[2])
                     end
 
+                    --screen x position
                     wx[0] = wx[0] * 200 / wy[0] + SW2
                     wx[1] = wx[1] * 200 / wy[1] + SW2
                     wx[2] = wx[2] * 200 / wy[2] + SW2
                     wx[3] = wx[3] * 200 / wy[3] + SW2
-
+                    --screen y position
                     wy[0] = wz[0] * 200 / wy[0] + SH2
                     wy[1] = wz[1] * 200 / wy[1] + SH2
                     wy[2] = wz[2] * 200 / wy[2] + SH2
                     wy[3] = wz[3] * 200 / wy[3] + SH2
 
-                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], secCount)
+                    --draw points
+                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, walls[i].r, walls[i].g, walls[i].b)
                 end
             end
-            sector.d = sector.d / (sector.we - sector.ws)
-            sector.surface = sector.surface * -1
+            sectors[s].d = sectors[s].d / (sectors[s].we - sectors[s].ws) --average sector distance
+            sectors[s].surface = sectors[s].surface * -1                  --flip to negative to draw surface
         end
-        secCount = secCount + 1
     end
     push:finish()
 
@@ -599,6 +535,28 @@ function love.keypressed(key)
         love.event.quit()
     end
 end
+
+--[[ FILE READ
+function loadSectors(file)
+    for line in io.lines(file) do
+        table.insert(sectors, {})
+        local data = split(line, ",")
+        for _, each in ipairs(data) do
+            table.insert(sectors[#sectors], each)
+        end
+    end
+end
+
+function split(str, sep)
+    local result = {}
+    local regex = ("([^%s]+)"):format(sep)
+    for each in str:gmatch(regex) do
+        table.insert(result, each)
+    end
+    return result
+end
+]]
+--
 
 function table_to_string(tbl)
     local result = "{"
@@ -624,3 +582,4 @@ function table_to_string(tbl)
     end
     return result .. "}"
 end
+
