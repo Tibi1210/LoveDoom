@@ -1,8 +1,10 @@
 _G.love = require("love")
-io.stdout:setvbuf('no')
+local push = require "lib/ext/push"
+local lick = require "lib/ext/lick"
+local tableToString = require "lib/ext/tableToString"
+local mapLoader = require "lib/private/mapLoader"
 
-local push = require "lib/push"
-local lick = require "lib/lick"
+io.stdout:setvbuf('no')
 lick.reset = true -- reload love.load everytime you save
 
 local player = {
@@ -26,68 +28,6 @@ push:setupScreen(160, 120, WW, WH, {
     pixelperfect = true
 })
 
-local function split(str, sep)
-    local result = {}
-    local regex = ("([^%s]+)"):format(sep)
-    for each in str:gmatch(regex) do
-        table.insert(result, each)
-    end
-    return result
-end
-
-local function loadSectors(line)
-    table.insert(sectors, {})
-    local data = split(line, ",")
-    sectors[#sectors].ws = tonumber(data[1])
-    sectors[#sectors].we = tonumber(data[2])
-    sectors[#sectors].z1 = tonumber(data[3])
-    sectors[#sectors].z2 = tonumber(data[4])
-    sectors[#sectors].d = tonumber(data[5])
-    sectors[#sectors].surf = {}
-    sectors[#sectors].surface = tonumber(data[6])
-    sectors[#sectors].r1 = tonumber(data[7])
-    sectors[#sectors].g1 = tonumber(data[8])
-    sectors[#sectors].b1 = tonumber(data[9])
-    sectors[#sectors].r2 = tonumber(data[10])
-    sectors[#sectors].g2 = tonumber(data[11])
-    sectors[#sectors].b2 = tonumber(data[12])
-end
-
-local function loadWalls(line)
-    table.insert(walls, {})
-    local data = split(line, ",")
-    walls[#walls].x1 = tonumber(data[1])
-    walls[#walls].y1 = tonumber(data[2])
-    walls[#walls].x2 = tonumber(data[3])
-    walls[#walls].y2 = tonumber(data[4])
-    walls[#walls].r = tonumber(data[5])
-    walls[#walls].g = tonumber(data[6])
-    walls[#walls].b = tonumber(data[7])
-end
-
-local function loadMap(file)
-    walls = {}
-    sectors = {}
-    local i = 0
-    for line in io.lines(file .. "/sectors.txt") do
-        if i == 0 then
-            i = 1
-            goto continue
-        end
-        loadSectors(line)
-        ::continue::
-    end
-    i = 0
-    for line in io.lines(file .. "/walls.txt") do
-        if i == 0 then
-            i = 1
-            goto continue
-        end
-        loadWalls(line)
-        ::continue::
-    end
-end
-
 local function drawPixel(x, y, r, g, b)
     love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
@@ -102,38 +42,38 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
 
     local xs = x1
 
-    if x1 < 1 then x1 = 1 end
-    if x2 < 1 then x2 = 1 end
-    if x1 > SW - 1 then x1 = SW - 1 end
-    if x2 > SW - 1 then x2 = SW - 1 end
+    if x1 < 0 then x1 = 0 end
+    if x2 < 0 then x2 = 0 end
+    if x1 > SW then x1 = SW end
+    if x2 > SW then x2 = SW end
 
-    for x = x1, x2, 1 do
+    for x = x1, x2 do
         local y1 = dyb * (x - xs + 0.5) / dx + b1
         local y2 = dyt * (x - xs + 0.5) / dx + t1
 
-        if y1 < 1 then y1 = 1 end
-        if y2 < 1 then y2 = 1 end
-        if y1 > SH - 1 then y1 = SH - 1 end
-        if y2 > SH - 1 then y2 = SH - 1 end
+        if y1 < 0 then y1 = 0 end
+        if y2 < 0 then y2 = 0 end
+        if y1 > SH then y1 = SH end
+        if y2 > SH then y2 = SH end
 
         if sectors[s].surface == 1 then
             sectors[s].surf[x] = y1
-            goto continue
+            --goto continue
         end
         if sectors[s].surface == 2 then
             sectors[s].surf[x] = y2
-            goto continue
+            --goto continue
         end
 
         if sectors[s].surface == -1 then
-            if not (sectors[s].surf[x] == nil) then
+            if sectors[s].surf[x] ~= nil then
                 for y = sectors[s].surf[x], y1 do
                     drawPixel(x, y, sectors[s].r1, sectors[s].g1, sectors[s].b1)
                 end
             end
         end
         if sectors[s].surface == -2 then
-            if not (sectors[s].surf[x] == nil) then
+            if sectors[s].surf[x] ~= nil then
                 for y = y2, sectors[s].surf[x] do
                     drawPixel(x, y, sectors[s].r2, sectors[s].g2, sectors[s].b2)
                 end
@@ -142,6 +82,10 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
 
         for y = y1, y2 do
             drawPixel(x, y, r, g, b)
+
+            if sectors[s].surf[x] == y then
+                drawPixel(x, y, 0, 255, 255)
+            end
         end
         ::continue::
     end
@@ -174,13 +118,13 @@ function love.load()
     min_dt = 1 / 35
     next_time = love.timer.getTime()
 
-    loadMap("maps/map1")
+    sectors, walls = mapLoader.loadMap("maps/map1")
 
     player.x = 617
     player.y = -318
     player.z = -204
     player.angle = 316
-    player.look = -11
+    player.look = -9
 
     local sin = math.sin
     local cos = math.cos
@@ -254,8 +198,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.setColor(255, 0, 0, 1)
-    love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 10)
+    --love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
     local wx = {}
     local wy = {}
     local wz = {}
@@ -372,29 +315,19 @@ function love.keypressed(key)
     if key == 'space' then
         love.event.quit()
     end
-end
 
-local function table_to_string(tbl)
-    local result = "{"
-    for k, v in pairs(tbl) do
-        -- Check the key type (ignore any numerical keys - assume its an array)
-        if type(k) == "string" then
-            result = result .. "[\"" .. k .. "\"]" .. "="
-        end
-
-        -- Check the value type
-        if type(v) == "table" then
-            result = result .. table_to_string(v)
-        elseif type(v) == "boolean" then
-            result = result .. tostring(v)
-        else
-            result = result .. "\"" .. v .. "\""
-        end
-        result = result .. ","
+    if key == 't' then
+        player.x = 617
+        player.y = -318
+        player.z = -204
+        player.angle = 316
+        player.look = -9
     end
-    -- Remove leading commas from the result
-    if result ~= "" then
-        result = result:sub(1, result:len() - 1)
+    if key == 'r' then
+        player.x = 540
+        player.y = -253
+        player.z = 176
+        player.angle = 316
+        player.look = 9
     end
-    return result .. "}"
 end
