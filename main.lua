@@ -13,235 +13,8 @@ local player = {
     look = 0
 }
 
-local walls = {
-    --RED
-    {
-        x1 = 0,
-        y1 = 0,
-        x2 = 100,
-        y2 = 0,
-        r = 155,
-        g = 0,
-        b = 0
-    },
-
-    {
-        x1 = 0,
-        y1 = 100,
-        x2 = 0,
-        y2 = 0,
-        r = 255,
-        g = 0,
-        b = 0
-    },
-    {
-        x1 = 100,
-        y1 = 0,
-        x2 = 100,
-        y2 = 100,
-        r = 255,
-        g = 0,
-        b = 0
-    },
-    {
-        x1 = 100,
-        y1 = 100,
-        x2 = 0,
-        y2 = 100,
-        r = 155,
-        g = 0,
-        b = 0
-    },
-    --GREEN
-    {
-        x1 = 0,
-        y1 = 200,
-        x2 = 100,
-        y2 = 200,
-        r = 0,
-        g = 155,
-        b = 0
-    },
-
-    {
-        x1 = 0,
-        y1 = 300,
-        x2 = 0,
-        y2 = 200,
-        r = 0,
-        g = 255,
-        b = 0
-    },
-    {
-        x1 = 100,
-        y1 = 200,
-        x2 = 100,
-        y2 = 300,
-        r = 0,
-        g = 255,
-        b = 0
-    },
-    {
-        x1 = 100,
-        y1 = 300,
-        x2 = 0,
-        y2 = 300,
-        r = 0,
-        g = 155,
-        b = 0
-    },
-    --BLUE
-    {
-        x1 = 200,
-        y1 = 0,
-        x2 = 300,
-        y2 = 0,
-        r = 0,
-        g = 0,
-        b = 155
-    },
-
-    {
-        x1 = 200,
-        y1 = 100,
-        x2 = 200,
-        y2 = 0,
-        r = 0,
-        g = 0,
-        b = 255
-    },
-
-    {
-        x1 = 300,
-        y1 = 0,
-        x2 = 300,
-        y2 = 100,
-        r = 0,
-        g = 0,
-        b = 255
-    },
-    {
-        x1 = 300,
-        y1 = 100,
-        x2 = 200,
-        y2 = 100,
-        r = 0,
-        g = 0,
-        b = 155
-    },
-    --WHITE
-    {
-        x1 = 200,
-        y1 = 200,
-        x2 = 300,
-        y2 = 200,
-        r = 155,
-        g = 155,
-        b = 155
-    },
-
-    {
-        x1 = 200,
-        y1 = 300,
-        x2 = 200,
-        y2 = 200,
-        r = 255,
-        g = 255,
-        b = 255
-    },
-
-    {
-        x1 = 300,
-        y1 = 200,
-        x2 = 300,
-        y2 = 300,
-        r = 255,
-        g = 255,
-        b = 255
-    },
-    {
-        x1 = 300,
-        y1 = 300,
-        x2 = 200,
-        y2 = 300,
-        r = 155,
-        g = 155,
-        b = 155
-    },
-}
-
-local sectors = {
-    {
-        ws = 1,
-        we = 4,
-        z1 = 0,
-        z2 = 40,
-        d = 0,
-        surf = {},
-        surface = 0,
-
-        r1 = 255,
-        g1 = 255,
-        b1 = 0,
-
-        r2 = 255,
-        g2 = 255,
-        b2 = 0,
-    },
-
-    {
-        ws = 5,
-        we = 8,
-        z1 = 0,
-        z2 = 40,
-        d = 0,
-        surf = {},
-        surface = 0,
-
-        r1 = 255,
-        g1 = 255,
-        b1 = 0,
-
-        r2 = 255,
-        g2 = 255,
-        b2 = 0,
-    },
-
-    {
-        ws = 9,
-        we = 12,
-        z1 = 0,
-        z2 = 40,
-        d = 0,
-        surf = {},
-        surface = 0,
-
-        r1 = 255,
-        g1 = 255,
-        b1 = 0,
-
-        r2 = 255,
-        g2 = 255,
-        b2 = 0,
-    },
-    {
-        ws = 13,
-        we = 16,
-        z1 = 0,
-        z2 = 40,
-        d = 0,
-        surf = {},
-        surface = 0,
-
-        r1 = 255,
-        g1 = 255,
-        b1 = 0,
-
-        r2 = 255,
-        g2 = 255,
-        b2 = 0,
-    }
-}
+local walls = {}
+local sectors = {}
 
 local cosLookUp = {}
 local sinLookUp = {}
@@ -253,12 +26,74 @@ push:setupScreen(160, 120, WW, WH, {
     pixelperfect = true
 })
 
-function drawPixel(x, y, r, g, b)
+local function split(str, sep)
+    local result = {}
+    local regex = ("([^%s]+)"):format(sep)
+    for each in str:gmatch(regex) do
+        table.insert(result, each)
+    end
+    return result
+end
+
+local function loadSectors(line)
+    table.insert(sectors, {})
+    local data = split(line, ",")
+    sectors[#sectors].ws = tonumber(data[1])
+    sectors[#sectors].we = tonumber(data[2])
+    sectors[#sectors].z1 = tonumber(data[3])
+    sectors[#sectors].z2 = tonumber(data[4])
+    sectors[#sectors].d = tonumber(data[5])
+    sectors[#sectors].surf = {}
+    sectors[#sectors].surface = tonumber(data[6])
+    sectors[#sectors].r1 = tonumber(data[7])
+    sectors[#sectors].g1 = tonumber(data[8])
+    sectors[#sectors].b1 = tonumber(data[9])
+    sectors[#sectors].r2 = tonumber(data[10])
+    sectors[#sectors].g2 = tonumber(data[11])
+    sectors[#sectors].b2 = tonumber(data[12])
+end
+
+local function loadWalls(line)
+    table.insert(walls, {})
+    local data = split(line, ",")
+    walls[#walls].x1 = tonumber(data[1])
+    walls[#walls].y1 = tonumber(data[2])
+    walls[#walls].x2 = tonumber(data[3])
+    walls[#walls].y2 = tonumber(data[4])
+    walls[#walls].r = tonumber(data[5])
+    walls[#walls].g = tonumber(data[6])
+    walls[#walls].b = tonumber(data[7])
+end
+
+local function loadMap(file)
+    walls = {}
+    sectors = {}
+    local i = 0
+    for line in io.lines(file .. "/sectors.txt") do
+        if i == 0 then
+            i = 1
+            goto continue
+        end
+        loadSectors(line)
+        ::continue::
+    end
+    i = 0
+    for line in io.lines(file .. "/walls.txt") do
+        if i == 0 then
+            i = 1
+            goto continue
+        end
+        loadWalls(line)
+        ::continue::
+    end
+end
+
+local function drawPixel(x, y, r, g, b)
     love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
 end
 
-function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
+local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
     local dyb = b2 - b1
     local dyt = t2 - t1
     local dx = x2 - x1
@@ -312,7 +147,7 @@ function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
     end
 end
 
-function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
+local function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
     local da = y1
     local db = y2
     local d = da - db
@@ -329,16 +164,17 @@ function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
     return x1, y1, z1
 end
 
-function dist(x1, y1, x2, y2)
+local function dist(x1, y1, x2, y2)
     return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
 end
 
 function love.load()
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.keyboard.setKeyRepeat(true)
-    min_dt = 1 / 30
+    min_dt = 1 / 35
     next_time = love.timer.getTime()
 
+    loadMap("maps/map1")
 
     player.x = 617
     player.y = -318
@@ -429,6 +265,7 @@ function love.draw()
     push:start()
 
     --order sectors by distance
+    local st
     for s = 1, #sectors do
         for w = 1, #sectors - s do
             if sectors[w].d < sectors[w + 1].d then
@@ -457,6 +294,7 @@ function love.draw()
                 local y2 = walls[i].y2 - player.y
 
                 --swap for surface
+                local swp
                 if loop == 1 then
                     swp = x1
                     x1 = x2
@@ -536,29 +374,7 @@ function love.keypressed(key)
     end
 end
 
---[[ FILE READ
-function loadSectors(file)
-    for line in io.lines(file) do
-        table.insert(sectors, {})
-        local data = split(line, ",")
-        for _, each in ipairs(data) do
-            table.insert(sectors[#sectors], each)
-        end
-    end
-end
-
-function split(str, sep)
-    local result = {}
-    local regex = ("([^%s]+)"):format(sep)
-    for each in str:gmatch(regex) do
-        table.insert(result, each)
-    end
-    return result
-end
-]]
---
-
-function table_to_string(tbl)
+local function table_to_string(tbl)
     local result = "{"
     for k, v in pairs(tbl) do
         -- Check the key type (ignore any numerical keys - assume its an array)
@@ -582,4 +398,3 @@ function table_to_string(tbl)
     end
     return result .. "}"
 end
-
