@@ -8,18 +8,18 @@ io.stdout:setvbuf('no')
 lick.reset = true -- reload love.load everytime you save
 
 local player = {
-    x = 0,
-    y = 0,
-    z = 0,
-    angle = 0,
-    look = 0
+    x = 0,     --int
+    y = 0,     --int
+    z = 0,     --int
+    angle = 0, --int
+    look = 0   --int
 }
 
 local walls = {}
 local sectors = {}
 
-local cosLookUp = {}
-local sinLookUp = {}
+local cosLookUp = {} --float
+local sinLookUp = {} --float
 
 
 push:setupScreen(160, 120, WW, WH, {
@@ -34,13 +34,13 @@ local function drawPixel(x, y, r, g, b)
 end
 
 local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
-    local dyb = b2 - b1
-    local dyt = t2 - t1
-    local dx = x2 - x1
+    local dyb = math.floor(b2 - b1) --int
+    local dyt = math.floor(t2 - t1) --int
+    local dx = math.floor(x2 - x1)  --int
 
     if dx == 0 then dx = 1 end
 
-    local xs = x1
+    local xs = math.floor(x1) --int
 
     if x1 < 0 then x1 = 0 end
     if x2 < 0 then x2 = 0 end
@@ -48,9 +48,9 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
     if x2 > SW then x2 = SW end
 
     for x = x1, x2 do
-        x=math.floor(x)
-        local y1 = dyb * (x - xs + 0.5) / dx + b1
-        local y2 = dyt * (x - xs + 0.5) / dx + t1
+        x = math.floor(x)
+        local y1 = math.floor(dyb * (x - xs + 0.5) / dx + b1) --int
+        local y2 = math.floor(dyt * (x - xs + 0.5) / dx + t1) --int
 
         if y1 < 0 then y1 = 0 end
         if y2 < 0 then y2 = 0 end
@@ -67,17 +67,13 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
         end
 
         if sectors[s].surface == -1 then
-            if sectors[s].surf[x] ~= nil then
-                for y = sectors[s].surf[x], y1 do
-                    drawPixel(x, y, sectors[s].r1, sectors[s].g1, sectors[s].b1)
-                end
+            for y = sectors[s].surf[x], y1 do
+                drawPixel(x, y, sectors[s].r1, sectors[s].g1, sectors[s].b1)
             end
         end
         if sectors[s].surface == -2 then
-            if sectors[s].surf[x] ~= nil then
-                for y = y2, sectors[s].surf[x] do
-                    drawPixel(x, y, sectors[s].r2, sectors[s].g2, sectors[s].b2)
-                end
+            for y = y2, sectors[s].surf[x] do
+                drawPixel(x, y, sectors[s].r2, sectors[s].g2, sectors[s].b2)
             end
         end
 
@@ -89,12 +85,12 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
 end
 
 local function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
-    local da = y1
-    local db = y2
-    local d = da - db
+    local da = y1     --float
+    local db = y2     --float
+    local d = da - db --float
     if d == 0 then d = 1 end
 
-    local s = da / (da - db)
+    local s = da / (da - db) --float
     x1 = x1 + s * (x2 - (x1))
     y1 = y1 + s * (y2 - (y1))
 
@@ -106,7 +102,7 @@ local function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
 end
 
 local function dist(x1, y1, x2, y2)
-    return math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1));
+    return math.floor(math.sqrt((x2 - x1) * (x2 - x1) + (y2 - y1) * (y2 - y1))) --int
 end
 
 function love.load()
@@ -196,16 +192,16 @@ end
 
 function love.draw()
     --love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
-    local wx = {}
-    local wy = {}
-    local wz = {}
-    local CS = cosLookUp[player.angle]
-    local SN = sinLookUp[player.angle]
+    local wx = {}                      --int[4]
+    local wy = {}                      --int[4]
+    local wz = {}                      --int[4]
+    local CS = cosLookUp[player.angle] --float
+    local SN = sinLookUp[player.angle] --float
 
     push:start()
 
     --order sectors by distance
-    local st
+    local st --sector
     for s = 1, #sectors do
         for w = 1, #sectors - s do
             if sectors[w].d < sectors[w + 1].d then
@@ -260,10 +256,10 @@ function love.draw()
                 sectors[s].d = sectors[s].d + dist(0, 0, (wx[0] + wx[1]) / 2, (wy[0] + wy[1]) / 2)
 
                 --World z height
-                wz[0] = sectors[s].z1 - player.z + (player.look * wy[0] / 32.0)
-                wz[1] = sectors[s].z1 - player.z + (player.look * wy[1] / 32.0)
-                wz[2] = wz[0] + sectors[s].z2
-                wz[3] = wz[1] + sectors[s].z2
+                wz[0] = sectors[s].z1 - player.z + (player.look * wy[0] / 32.0) --int
+                wz[1] = sectors[s].z1 - player.z + (player.look * wy[1] / 32.0) --int
+                wz[2] = wz[0] + sectors[s].z2                                   --int
+                wz[3] = wz[1] + sectors[s].z2                                   --int
 
                 --dont draw if behind player
                 if not (wy[0] < 1 and wy[1] < 1) then
@@ -289,12 +285,28 @@ function love.draw()
                     wy[2] = wz[2] * 200 / wy[2] + SH2
                     wy[3] = wz[3] * 200 / wy[3] + SH2
 
+                    --convert to int
+                    wx[0] = math.floor(wx[0])
+                    wx[1] = math.floor(wx[1])
+                    wx[2] = math.floor(wx[2])
+                    wx[3] = math.floor(wx[3])
+
+                    wy[0] = math.floor(wy[0])
+                    wy[1] = math.floor(wy[1])
+                    wy[2] = math.floor(wy[2])
+                    wy[3] = math.floor(wy[3])
+
+                    wz[0] = math.floor(wz[0])
+                    wz[1] = math.floor(wz[1])
+                    wz[2] = math.floor(wz[2])
+                    wz[3] = math.floor(wz[3])
+
                     --draw points
                     drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, walls[i].r, walls[i].g, walls[i].b)
                 end
             end
-            sectors[s].d = sectors[s].d / (sectors[s].we - sectors[s].ws) --average sector distance
-            sectors[s].surface = sectors[s].surface * -1                  --flip to negative to draw surface
+            sectors[s].d = math.floor(sectors[s].d / (sectors[s].we - sectors[s].ws)) --average sector distance
+            sectors[s].surface = sectors[s].surface * -1                              --flip to negative to draw surface
         end
     end
     push:finish()
