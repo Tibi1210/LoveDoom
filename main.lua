@@ -48,6 +48,7 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
     if x2 > SW then x2 = SW end
 
     for x = x1, x2 do
+        x=math.floor(x)
         local y1 = dyb * (x - xs + 0.5) / dx + b1
         local y2 = dyt * (x - xs + 0.5) / dx + t1
 
@@ -58,11 +59,11 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
 
         if sectors[s].surface == 1 then
             sectors[s].surf[x] = y1
-            --goto continue
+            goto continue
         end
         if sectors[s].surface == 2 then
             sectors[s].surf[x] = y2
-            --goto continue
+            goto continue
         end
 
         if sectors[s].surface == -1 then
@@ -82,10 +83,6 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
 
         for y = y1, y2 do
             drawPixel(x, y, r, g, b)
-
-            if sectors[s].surf[x] == y then
-                drawPixel(x, y, 0, 255, 255)
-            end
         end
         ::continue::
     end
