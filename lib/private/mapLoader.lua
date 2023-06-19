@@ -45,19 +45,11 @@ end
 function mapLoader.loadMap(file)
     walls = {}
     sectors = {}
-    local i = 0
     for line in io.lines(file .. "/sectors.txt") do
-        if i ~= 0 then
             loadSectors(line)
-        end
-        i = 1
     end
-    i = 0
     for line in io.lines(file .. "/walls.txt") do
-        if i ~= 0 then
             loadWalls(line)
-        end
-        i = 1
     end
     return sectors,walls
 end

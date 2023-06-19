@@ -111,7 +111,7 @@ function love.load()
     min_dt = 1 / 35
     next_time = love.timer.getTime()
 
-    sectors, walls = mapLoader.loadMap("maps/map1")
+    sectors, walls = mapLoader.loadMap("maps/map3")
 
     player.x = 617
     player.y = -318
@@ -133,14 +133,14 @@ function love.update(dt)
 
     --look left/right
     if love.keyboard.isDown("j") then
-        player.angle = player.angle - 2
+        player.angle = player.angle - 4
         if player.angle < 0 then
             player.angle = player.angle + 360
         end
     end
 
     if love.keyboard.isDown("l") then
-        player.angle = player.angle + 2
+        player.angle = player.angle + 4
         if player.angle > 359 then
             player.angle = player.angle - 360
         end
@@ -338,5 +338,8 @@ function love.keypressed(key)
         player.z = 176
         player.angle = 316
         player.look = 9
+    end
+    if key == 'g' then
+        sectors, walls = mapLoader.loadMap("maps/map3")
     end
 end
