@@ -33,7 +33,7 @@ local function drawPixel(x, y, r, g, b)
     love.graphics.points(x, y)
 end
 
-local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
+local function drawWall(x1, x2, b1, b2, t1, t2, s,w,frontBack, r, g, b)
     local dyb = math.floor(b2 - b1) --int
     local dyt = math.floor(t2 - t1) --int
     local dx = math.floor(x2 - x1)  --int
@@ -57,30 +57,31 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, r, g, b)
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
 
-        if sectors[s].surface == 1 then
-            sectors[s].surf[x] = y1
-            goto continue
-        end
-        if sectors[s].surface == 2 then
-            sectors[s].surf[x] = y2
-            goto continue
+        if frontBack==1 then
+            if sectors[s].surface==1 then
+                sectors[s].surf[x]=y1
+            end
+            if sectors[s].surface==2 then
+                sectors[s].surf[x]=y2
+            end
+            for y = y1, y2 do
+                drawPixel(x, y, r, g, b)
+            end
+            
         end
 
-        if sectors[s].surface == -1 then
-            for y = sectors[s].surf[x], y1 do
-                drawPixel(x, y, sectors[s].r1, sectors[s].g1, sectors[s].b1)
+        if frontBack==2 then
+            if sectors[s].surface==1 then
+                y2=sectors[s].surf[x]
             end
-        end
-        if sectors[s].surface == -2 then
-            for y = y2, sectors[s].surf[x] do
-                drawPixel(x, y, sectors[s].r2, sectors[s].g2, sectors[s].b2)
+            if sectors[s].surface==2 then
+                y1=sectors[s].surf[x]
             end
+            for y = y1, y2 do
+                drawPixel(x, y, r, g, b)
+            end
+            
         end
-
-        for y = y1, y2 do
-            drawPixel(x, y, r, g, b)
-        end
-        ::continue::
     end
 end
 
@@ -197,6 +198,7 @@ function love.draw()
     local wz = {}                      --int[4]
     local CS = cosLookUp[player.angle] --float
     local SN = sinLookUp[player.angle] --float
+    local cycles = 1                   --int
 
     push:start()
 
@@ -217,11 +219,23 @@ function love.draw()
         sectors[s].d = 0 --clear distance
         sectors[s].surf = {}
 
-        sectors[s].surface = 0                                      -- no surface
-        if player.z < sectors[s].z1 then sectors[s].surface = 1 end --top surface
-        if player.z > sectors[s].z2 then sectors[s].surface = 2 end --bottom surface
+        sectors[s].surface = 0           -- no surface
+        if player.z < sectors[s].z1 then --top surface
+            sectors[s].surface = 1
+            cycles = 2
+            for x = 0, SW do
+                sectors[s].surf[x] = SH
+            end
+        end
+        if player.z > sectors[s].z2 then --bottom surface
+            sectors[s].surface = 2
+            cycles = 2
+            for x = 0, SW do
+                sectors[s].surf[x] = 0
+            end
+        end
 
-        for loop = 1, 2 do
+        for frontBack = 1, cycles do
             for i = sectors[s].ws, sectors[s].we do
                 --offset bottom 2 points by player
                 local x1 = walls[i].x1 - player.x
@@ -231,7 +245,7 @@ function love.draw()
 
                 --swap for surface
                 local swp
-                if loop == 1 then
+                if frontBack == 2 then
                     swp = x1
                     x1 = x2
                     x2 = swp
@@ -258,8 +272,8 @@ function love.draw()
                 --World z height
                 wz[0] = sectors[s].z1 - player.z + (player.look * wy[0] / 32.0) --int
                 wz[1] = sectors[s].z1 - player.z + (player.look * wy[1] / 32.0) --int
-                wz[2] = wz[0] + sectors[s].z2                                   --int
-                wz[3] = wz[1] + sectors[s].z2                                   --int
+                wz[2] = sectors[s].z2 - player.z + (player.look * wy[0] / 32.0) --int
+                wz[3] = sectors[s].z2 - player.z + (player.look * wy[1] / 32.0) --int
 
                 --dont draw if behind player
                 if not (wy[0] < 1 and wy[1] < 1) then
@@ -302,11 +316,11 @@ function love.draw()
                     wz[3] = math.floor(wz[3])
 
                     --draw points
-                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, walls[i].r, walls[i].g, walls[i].b)
+                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, i, frontBack, walls[i].r, walls[i].g,
+                        walls[i].b)
                 end
             end
-            sectors[s].d = math.floor(sectors[s].d / (sectors[s].we - sectors[s].ws)) --average sector distance
-            sectors[s].surface = sectors[s].surface * -1                              --flip to negative to draw surface
+            sectors[s].d = math.floor(sectors[s].d / (sectors[s].we - sectors[s].ws)) --average sector distances
         end
     end
     push:finish()
