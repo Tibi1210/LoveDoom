@@ -22,8 +22,12 @@ local function loadSectors(line)
     sectors[#sectors].d = tonumber(data[5])
     sectors[#sectors].surf = {}
     sectors[#sectors].surface = tonumber(data[6])
-    sectors[#sectors].st = tonumber(data[7])
-    sectors[#sectors].ss = tonumber(data[8])
+    sectors[#sectors].r1 = tonumber(data[7])
+    sectors[#sectors].g1 = tonumber(data[8])
+    sectors[#sectors].b1 = tonumber(data[9])
+    sectors[#sectors].r2 = tonumber(data[10])
+    sectors[#sectors].g2 = tonumber(data[11])
+    sectors[#sectors].b2 = tonumber(data[12])
 end
 
 local function loadWalls(line)
@@ -33,10 +37,9 @@ local function loadWalls(line)
     walls[#walls].y1 = tonumber(data[2])
     walls[#walls].x2 = tonumber(data[3])
     walls[#walls].y2 = tonumber(data[4])
-    walls[#walls].wt = tonumber(data[5])
-    walls[#walls].u = tonumber(data[6])
-    walls[#walls].v = tonumber(data[7])
-    walls[#walls].shade = tonumber(data[8])
+    walls[#walls].r = tonumber(data[5])
+    walls[#walls].g = tonumber(data[6])
+    walls[#walls].b = tonumber(data[7])
 end
 
 function mapLoader.loadMap(file)

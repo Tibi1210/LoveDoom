@@ -33,7 +33,7 @@ local function drawPixel(x, y, r, g, b)
     love.graphics.points(x, y)
 end
 
-local function drawWall(x1, x2, b1, b2, t1, t2, s,w,frontBack, r, g, b)
+local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack, r, g, b)
     local dyb = math.floor(b2 - b1) --int
     local dyt = math.floor(t2 - t1) --int
     local dx = math.floor(x2 - x1)  --int
@@ -57,30 +57,30 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s,w,frontBack, r, g, b)
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
 
-        if frontBack==1 then
-            if sectors[s].surface==1 then
-                sectors[s].surf[x]=y1
-            end
-            if sectors[s].surface==2 then
-                sectors[s].surf[x]=y2
-            end
+        if frontBack == 1 then
+            if sectors[s].surface == 1 then sectors[s].surf[x] = y1 end
+            if sectors[s].surface == 2 then sectors[s].surf[x] = y2 end
             for y = y1, y2 do
-                drawPixel(x, y, 255, 0, 0)
+                drawPixel(x, y, r, g, b)
             end
-            
         end
 
-        if frontBack==2 then
-            if sectors[s].surface==1 then
-                y2=sectors[s].surf[x]
+        if frontBack == 2 then
+            if sectors[s].surface == 1 then
+                y2 = sectors[s].surf[x]
+                r = sectors[s].r1
+                g = sectors[s].g1
+                b = sectors[s].b1
             end
-            if sectors[s].surface==2 then
-                y1=sectors[s].surf[x]
+            if sectors[s].surface == 2 then
+                y1 = sectors[s].surf[x]
+                r = sectors[s].r2
+                g = sectors[s].g2
+                b = sectors[s].b2
             end
             for y = y1, y2 do
-                drawPixel(x, y, 0, 255, 0)
+                drawPixel(x, y, r, g, b)
             end
-            
         end
     end
 end
@@ -112,7 +112,7 @@ function love.load()
     min_dt = 1 / 35
     next_time = love.timer.getTime()
 
-    sectors, walls = mapLoader.loadMap("maps/map1")
+    sectors, walls = mapLoader.loadMap("maps/map3")
 
     player.x = 617
     player.y = -318
