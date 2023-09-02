@@ -65,13 +65,56 @@ local function testTextures()
     end
 end
 
+local function floors()
+    local x, y                          --int
+    local xo = math.floor(SW2)          --int
+    local yo = math.floor(SH2)          --int
+
+    local lookUpDown = -player.look * 2 --float
+    if lookUpDown > SH then lookUpDown = SH end
+
+    local moveUpDown = player.z / 16.0 --float
+    if moveUpDown == 0 then moveUpDown = 0.0001 end
+
+    local ys = math.floor(-yo)         --int
+    local ye = math.floor(-lookUpDown) --int
+
+    if moveUpDown < 0 then
+        ys = math.floor(-lookUpDown)
+        ye = math.floor(yo + lookUpDown)
+    end
+
+    for y = ys, ye do
+        for x = -xo, xo do
+            local z = y + lookUpDown --float
+            if z == 0 then z = 0.0001 end
+
+            local fx = x / z * moveUpDown                                                              --float
+            local fy = 200.0 / z * moveUpDown                                                          --float
+            local rx = fx * sinLookUp[player.angle] - fy * cosLookUp[player.angle] + (player.y / 30.0) --float
+            local ry = fx * cosLookUp[player.angle] + fy * sinLookUp[player.angle] - (player.x / 30.0) --float
+
+            if rx < 0 then rx = -rx + 1 end
+            if (ry < 0) then ry = -ry + 1 end
+
+
+            if math.floor(rx) % 2 == math.floor(ry) % 2 then
+                drawPixel(x + xo, y + yo, 155, 0, 0)
+            else
+                drawPixel(x + xo, y + yo, 0, 0, 0)
+            end
+        end
+    end
+end
+
+
 local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
     --wall texture
     local wt = walls[w].wt --int
 
     ------------------------------------------------------
-    local ht = 0                                   --float
-    local ht_step = textures[wt].width / (x2 - x1) --float
+    local ht = 0                                                --float
+    local ht_step = textures[wt].width * walls[w].u / (x2 - x1) --float
     ------------------------------------------------------
 
     local dyb = math.floor(b2 - b1) --int
@@ -82,7 +125,10 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
 
     local xs = math.floor(x1) --int
 
-    if x1 < 0 then ht=ht-ht_step*x1; x1 = 0 end
+    if x1 < 0 then
+        ht = ht - ht_step * x1
+        x1 = 0
+    end
     if x2 < 0 then x2 = 0 end
     if x1 > SW then x1 = SW end
     if x2 > SW then x2 = SW end
@@ -93,11 +139,14 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
         local y2 = math.floor(dyt * (x - xs + 0.5) / dx + t1) --int
 
         -------------------------------------------------------
-        local vt = 0                                    --float
-        local vt_step = textures[wt].height / (y2 - y1) --float
+        local vt = 0                                                 --float
+        local vt_step = textures[wt].height * walls[w].v / (y2 - y1) --float
         -------------------------------------------------------
 
-        if y1 < 0 then vt=vt-vt_step*y1; y1 = 0 end
+        if y1 < 0 then
+            vt = vt - vt_step * y1
+            y1 = 0
+        end
         if y2 < 0 then y2 = 0 end
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
@@ -112,10 +161,14 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
             -------------------------------------------------------------------
             for y = y1, y2 do
                 --drawPixel(x, y, 0, 255, 0)
-                local pixel = math.floor(textures[wt].height - (math.floor(vt) % textures[wt].height) - 1) * 3 * textures[wt].width + (math.floor(ht) % textures[wt].width * 3)
-                local r = textures[wt].name[pixel + 1]
-                local g = textures[wt].name[pixel + 2]
-                local b = textures[wt].name[pixel + 3]
+                local pixel = math.floor(textures[wt].height - (math.floor(vt) % textures[wt].height) - 1) * 3 *
+                textures[wt].width + (math.floor(ht) % textures[wt].width * 3)
+                local r = textures[wt].name[pixel + 1] - walls[w].shade
+                if r < 0 then r = 0 end
+                local g = textures[wt].name[pixel + 2] - walls[w].shade
+                if g < 0 then g = 0 end
+                local b = textures[wt].name[pixel + 3] - walls[w].shade
+                if b < 0 then r = b end
                 --print("R:"..r.." G:"..g.." B:"..b)
                 drawPixel(x, y, r, g, b)
                 vt = vt + vt_step
@@ -125,14 +178,50 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
         end
 
         if frontBack == 2 then
+            local xo = math.floor(SW2) --int
+            local yo = math.floor(SH2) --int
+            local x2 = math.floor(x - xo)
+            local wo
+            local tile = sectors[s].ss * 7
+
             if sectors[s].surface == 1 then
                 y2 = sectors[s].surf[x]
+                wo = sectors[s].z1
             end
             if sectors[s].surface == 2 then
                 y1 = sectors[s].surf[x]
+                wo = sectors[s].z2
             end
-            for y = y1, y2 do
-                drawPixel(x, y, 255, 0, 0)
+
+            local lookUpDown = -player.look * math.pi * 2 --float
+            if lookUpDown > SH then lookUpDown = SH end
+
+            local moveUpDown = (player.z - wo) / yo --float
+            if moveUpDown == 0 then moveUpDown = 0.0001 end
+
+            local ys = math.floor(y1 - yo) --int
+            local ye = math.floor(y2 - yo) --int
+
+            for y = ys, ye do
+                local z = y + lookUpDown --float
+                if z == 0 then z = 0.0001 end
+
+                local fx = x2 / z * moveUpDown * tile                                                             --float
+                local fy = 200.0 / z * moveUpDown * tile                                                          --float
+                local rx = fx * sinLookUp[player.angle] - fy * cosLookUp[player.angle] + (player.y / 60.0 * tile) --float
+                local ry = fx * cosLookUp[player.angle] + fy * sinLookUp[player.angle] - (player.x / 60.0 * tile) --float
+
+                if rx < 0 then rx = -rx + 1 end
+                if (ry < 0) then ry = -ry + 1 end
+
+                local st = sectors[s].st
+
+                local pixel = math.floor(textures[st].height - (math.floor(ry) % textures[st].height) - 1) * 3 * textures[st].width + (math.floor(rx) % textures[st].width * 3)
+                local r = textures[st].name[pixel + 1]
+                local g = textures[st].name[pixel + 2]
+                local b = textures[st].name[pixel + 3]
+                drawPixel(x2+xo, y+yo, r, g, b)
+
             end
         end
     end
@@ -168,9 +257,9 @@ function love.load()
 
     sectors, walls = mapLoader.loadMap("maps/map2")
 
-    player.x = 617
-    player.y = -318
-    player.z = -204
+    player.x = 433.63808305561
+    player.y = 116.60143512704
+    player.z = -64
     player.angle = 316
     player.look = -9
 
@@ -246,7 +335,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
+    --love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
     local wx = {}                      --int[4]
     local wy = {}                      --int[4]
     local wz = {}                      --int[4]
@@ -368,7 +457,6 @@ function love.draw()
         return
     end
     love.timer.sleep(next_time - cur_time)
-    --print("x: " .. player.x .. " " .. "y: " .. player.y .. " " .. "z: " .. player.z .. " " .. "a: " .. player.angle .. " " .. "l: " .. player.look)
 end
 
 function love.keypressed(key)
@@ -376,20 +464,21 @@ function love.keypressed(key)
         love.event.quit()
     end
 
-    if key == 't' then
-        player.x = 617
-        player.y = -318
-        player.z = -204
+    if key == 'r' then
+        player.x = 433.63808305561
+        player.y = 116.60143512704
+        player.z = -64
         player.angle = 316
         player.look = -9
     end
-    if key == 'r' then
-        player.x = 540
-        player.y = -253
-        player.z = 176
-        player.angle = 316
-        player.look = 9
+
+    if key == 't' then
+        print("x: " ..
+            player.x ..
+            " " ..
+            "y: " .. player.y .. " " .. "z: " .. player.z .. " " .. "a: " .. player.angle .. " " .. "l: " .. player.look)
     end
+
     if key == 'g' then
         sectors, walls = mapLoader.loadMap("maps/map2")
     end

@@ -1,4 +1,4 @@
-local res = 6
+local res = 8
 
 SW = 160
 SH = 120
@@ -16,5 +16,5 @@ function love.conf(t)
 
     t.console = true
     
-    t.window.borderless = true
+    --t.window.borderless = true
 end
