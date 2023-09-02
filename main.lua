@@ -46,8 +46,6 @@ push:setupScreen(160, 120, WW, WH, {
 })
 
 
-
-
 local function drawPixel(x, y, r, g, b)
     love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
@@ -84,7 +82,7 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
 
     local xs = math.floor(x1) --int
 
-    if x1 < 0 then x1 = 0 end
+    if x1 < 0 then ht=ht-ht_step*x1; x1 = 0 end
     if x2 < 0 then x2 = 0 end
     if x1 > SW then x1 = SW end
     if x2 > SW then x2 = SW end
@@ -99,7 +97,7 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
         local vt_step = textures[wt].height / (y2 - y1) --float
         -------------------------------------------------------
 
-        if y1 < 0 then y1 = 0 end
+        if y1 < 0 then vt=vt-vt_step*y1; y1 = 0 end
         if y2 < 0 then y2 = 0 end
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
@@ -147,12 +145,12 @@ local function clipBehindPlayer(x1, y1, z1, x2, y2, z2)
     if d == 0 then d = 1 end
 
     local s = da / (da - db) --float
-    x1 = x1 + s * (x2 - (x1))
-    y1 = y1 + s * (y2 - (y1))
+    x1 = math.floor(x1 + math.floor(s * (x2 - (x1))))
+    y1 = math.floor(y1 + math.floor(s * (y2 - (y1))))
 
     if y1 == 0 then y1 = 1 end
 
-    z1 = z1 + s * (z2 - (z1))
+    z1 = math.floor(z1 + math.floor(s * (z2 - (z1))))
 
     return x1, y1, z1
 end
@@ -162,6 +160,7 @@ local function dist(x1, y1, x2, y2)
 end
 
 function love.load()
+    love.window.setVSync(0)
     love.graphics.setDefaultFilter("nearest", "nearest")
     love.keyboard.setKeyRepeat(true)
     min_dt = 1 / 35
@@ -247,7 +246,7 @@ function love.update(dt)
 end
 
 function love.draw()
-    --love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
+    love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
     local wx = {}                      --int[4]
     local wy = {}                      --int[4]
     local wz = {}                      --int[4]
@@ -256,8 +255,6 @@ function love.draw()
     local cycles = 1                   --int
 
     push:start()
-
-    testTextures()
 
     --order sectors by distance
     local st --sector
@@ -312,14 +309,14 @@ function love.draw()
                 end
 
                 --World x position
-                wx[0] = x1 * CS - y1 * SN
-                wx[1] = x2 * CS - y2 * SN
+                wx[0] = math.floor(x1 * CS - y1 * SN)
+                wx[1] = math.floor(x2 * CS - y2 * SN)
                 wx[2] = wx[0]
                 wx[3] = wx[1]
 
                 --World y position
-                wy[0] = y1 * CS + x1 * SN
-                wy[1] = y2 * CS + x2 * SN
+                wy[0] = math.floor(y1 * CS + x1 * SN)
+                wy[1] = math.floor(y2 * CS + x2 * SN)
                 wy[2] = wy[0]
                 wy[3] = wy[1]
 
@@ -327,10 +324,10 @@ function love.draw()
                 sectors[s].d = sectors[s].d + dist(0, 0, (wx[0] + wx[1]) / 2, (wy[0] + wy[1]) / 2)
 
                 --World z height
-                wz[0] = sectors[s].z1 - player.z + (player.look * wy[0] / 32.0) --int
-                wz[1] = sectors[s].z1 - player.z + (player.look * wy[1] / 32.0) --int
-                wz[2] = sectors[s].z2 - player.z + (player.look * wy[0] / 32.0) --int
-                wz[3] = sectors[s].z2 - player.z + (player.look * wy[1] / 32.0) --int
+                wz[0] = math.floor(sectors[s].z1 - player.z + math.floor(player.look * wy[0] / 32.0)) --int
+                wz[1] = math.floor(sectors[s].z1 - player.z + math.floor(player.look * wy[1] / 32.0)) --int
+                wz[2] = math.floor(sectors[s].z2 - player.z + math.floor(player.look * wy[0] / 32.0)) --int
+                wz[3] = math.floor(sectors[s].z2 - player.z + math.floor(player.look * wy[1] / 32.0)) --int
 
                 --dont draw if behind player
                 if not (wy[0] < 1 and wy[1] < 1) then
@@ -346,35 +343,18 @@ function love.draw()
                     end
 
                     --screen x position
-                    wx[0] = wx[0] * 200 / wy[0] + SW2
-                    wx[1] = wx[1] * 200 / wy[1] + SW2
-                    wx[2] = wx[2] * 200 / wy[2] + SW2
-                    wx[3] = wx[3] * 200 / wy[3] + SW2
+                    wx[0] = math.floor(wx[0] * 200 / wy[0] + SW2)
+                    wx[1] = math.floor(wx[1] * 200 / wy[1] + SW2)
+                    wx[2] = math.floor(wx[2] * 200 / wy[2] + SW2)
+                    wx[3] = math.floor(wx[3] * 200 / wy[3] + SW2)
                     --screen y position
-                    wy[0] = wz[0] * 200 / wy[0] + SH2
-                    wy[1] = wz[1] * 200 / wy[1] + SH2
-                    wy[2] = wz[2] * 200 / wy[2] + SH2
-                    wy[3] = wz[3] * 200 / wy[3] + SH2
-
-                    --convert to int
-                    wx[0] = math.floor(wx[0])
-                    wx[1] = math.floor(wx[1])
-                    wx[2] = math.floor(wx[2])
-                    wx[3] = math.floor(wx[3])
-
-                    wy[0] = math.floor(wy[0])
-                    wy[1] = math.floor(wy[1])
-                    wy[2] = math.floor(wy[2])
-                    wy[3] = math.floor(wy[3])
-
-                    wz[0] = math.floor(wz[0])
-                    wz[1] = math.floor(wz[1])
-                    wz[2] = math.floor(wz[2])
-                    wz[3] = math.floor(wz[3])
+                    wy[0] = math.floor(wz[0] * 200 / wy[0] + SH2)
+                    wy[1] = math.floor(wz[1] * 200 / wy[1] + SH2)
+                    wy[2] = math.floor(wz[2] * 200 / wy[2] + SH2)
+                    wy[3] = math.floor(wz[3] * 200 / wy[3] + SH2)
 
                     --draw points
-                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, i, frontBack, walls[i].r, walls[i].g,
-                        walls[i].b)
+                    drawWall(wx[0], wx[1], wy[0], wy[1], wy[2], wy[3], s, i, frontBack)
                 end
             end
             sectors[s].d = math.floor(sectors[s].d / (sectors[s].we - sectors[s].ws)) --average sector distances

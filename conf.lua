@@ -15,6 +15,6 @@ function love.conf(t)
     t.window.resizable = false
 
     t.console = true
-
-    --t.window.borderless = true
+    
+    t.window.borderless = true
 end
