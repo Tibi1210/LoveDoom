@@ -4,8 +4,25 @@ local lick = require "lib/ext/lick"
 local tableToString = require "lib/ext/tableToString"
 local mapLoader = require "lib/private/mapLoader"
 
+local brickTexture = require "textures/brick"
+local brick2Texture = require "textures/brick2"
+
+local textures = {
+    {
+        name = brickTexture,
+        height = 16,
+        width = 16
+    },
+    {
+        name = brick2Texture,
+        height = 16,
+        width = 16
+    }
+}
+
+
 io.stdout:setvbuf('no')
-lick.reset = true -- reload love.load everytime you save
+lick.reset = true
 
 local player = {
     x = 0,     --int
@@ -28,12 +45,37 @@ push:setupScreen(160, 120, WW, WH, {
     pixelperfect = true
 })
 
+
+
+
 local function drawPixel(x, y, r, g, b)
     love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
 end
 
-local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack, r, g, b)
+local function testTextures()
+    local t = 1 --texture number
+    for y = 1, textures[t].height - 1 do
+        for x = 1, textures[t].width - 1 do
+            local pixel = math.floor(y * 3 * textures[t].width + x * 3)
+            --print(pixel)
+            local r = textures[t].name[pixel + 1]
+            local g = textures[t].name[pixel + 2]
+            local b = textures[t].name[pixel + 3]
+            drawPixel(x, y, r, g, b)
+        end
+    end
+end
+
+local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
+    --wall texture
+    local wt = walls[w].wt --int
+
+    ------------------------------------------------------
+    local ht = 0                                   --float
+    local ht_step = textures[wt].width / (x2 - x1) --float
+    ------------------------------------------------------
+
     local dyb = math.floor(b2 - b1) --int
     local dyt = math.floor(t2 - t1) --int
     local dx = math.floor(x2 - x1)  --int
@@ -52,34 +94,47 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack, r, g, b)
         local y1 = math.floor(dyb * (x - xs + 0.5) / dx + b1) --int
         local y2 = math.floor(dyt * (x - xs + 0.5) / dx + t1) --int
 
+        -------------------------------------------------------
+        local vt = 0                                    --float
+        local vt_step = textures[wt].height / (y2 - y1) --float
+        -------------------------------------------------------
+
         if y1 < 0 then y1 = 0 end
         if y2 < 0 then y2 = 0 end
         if y1 > SH then y1 = SH end
         if y2 > SH then y2 = SH end
 
         if frontBack == 1 then
-            if sectors[s].surface == 1 then sectors[s].surf[x] = y1 end
-            if sectors[s].surface == 2 then sectors[s].surf[x] = y2 end
-            for y = y1, y2 do
-                drawPixel(x, y, r, g, b)
+            if sectors[s].surface == 1 then
+                sectors[s].surf[x] = y1
             end
+            if sectors[s].surface == 2 then
+                sectors[s].surf[x] = y2
+            end
+            -------------------------------------------------------------------
+            for y = y1, y2 do
+                --drawPixel(x, y, 0, 255, 0)
+                local pixel = math.floor(textures[wt].height - (math.floor(vt) % textures[wt].height) - 1) * 3 * textures[wt].width + (math.floor(ht) % textures[wt].width * 3)
+                local r = textures[wt].name[pixel + 1]
+                local g = textures[wt].name[pixel + 2]
+                local b = textures[wt].name[pixel + 3]
+                --print("R:"..r.." G:"..g.." B:"..b)
+                drawPixel(x, y, r, g, b)
+                vt = vt + vt_step
+            end
+            ht = ht + ht_step
+            ---------------------------------------------------------------------
         end
 
         if frontBack == 2 then
             if sectors[s].surface == 1 then
                 y2 = sectors[s].surf[x]
-                r = sectors[s].r1
-                g = sectors[s].g1
-                b = sectors[s].b1
             end
             if sectors[s].surface == 2 then
                 y1 = sectors[s].surf[x]
-                r = sectors[s].r2
-                g = sectors[s].g2
-                b = sectors[s].b2
             end
             for y = y1, y2 do
-                drawPixel(x, y, r, g, b)
+                drawPixel(x, y, 255, 0, 0)
             end
         end
     end
@@ -112,7 +167,7 @@ function love.load()
     min_dt = 1 / 35
     next_time = love.timer.getTime()
 
-    sectors, walls = mapLoader.loadMap("maps/map3")
+    sectors, walls = mapLoader.loadMap("maps/map2")
 
     player.x = 617
     player.y = -318
@@ -201,6 +256,8 @@ function love.draw()
     local cycles = 1                   --int
 
     push:start()
+
+    testTextures()
 
     --order sectors by distance
     local st --sector
@@ -354,6 +411,6 @@ function love.keypressed(key)
         player.look = 9
     end
     if key == 'g' then
-        sectors, walls = mapLoader.loadMap("maps/map3")
+        sectors, walls = mapLoader.loadMap("maps/map2")
     end
 end
