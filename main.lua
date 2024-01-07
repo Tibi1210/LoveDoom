@@ -1,7 +1,5 @@
 _G.love = require("love")
 local push = require "lib/ext/push"
-local lick = require "lib/ext/lick"
-local tableToString = require "lib/ext/tableToString"
 local mapLoader = require "lib/private/mapLoader"
 
 local brickTexture = require "textures/brick"
@@ -20,10 +18,6 @@ local textures = {
     }
 }
 
-
-io.stdout:setvbuf('no')
-lick.reset = true
-
 local player = {
     x = 0,     --int
     y = 0,     --int
@@ -39,7 +33,7 @@ local cosLookUp = {} --float
 local sinLookUp = {} --float
 
 
-push:setupScreen(160, 120, WW, WH, {
+push:setupScreen(SW, SH, WW, WH, {
     fullscreen = false,
     resizable = false,
     pixelperfect = true
@@ -47,6 +41,7 @@ push:setupScreen(160, 120, WW, WH, {
 
 
 local function drawPixel(x, y, r, g, b)
+
     love.graphics.setColor(love.math.colorFromBytes(r, g, b))
     love.graphics.points(x, y)
 end
@@ -221,7 +216,6 @@ local function drawWall(x1, x2, b1, b2, t1, t2, s, w, frontBack)
                 local g = textures[st].name[pixel + 2]
                 local b = textures[st].name[pixel + 3]
                 drawPixel(x2+xo, y+yo, r, g, b)
-
             end
         end
     end
@@ -249,8 +243,7 @@ local function dist(x1, y1, x2, y2)
 end
 
 function love.load()
-    love.window.setVSync(0)
-    love.graphics.setDefaultFilter("nearest", "nearest")
+    love.graphics.setDefaultFilter("nearest", "nearest", 0)
     love.keyboard.setKeyRepeat(true)
     min_dt = 1 / 35
     next_time = love.timer.getTime()
@@ -335,6 +328,8 @@ function love.update(dt)
 end
 
 function love.draw()
+    push:start()
+
     --love.graphics.print("FPS: " .. love.timer.getFPS(), 10, 12)
     local wx = {}                      --int[4]
     local wy = {}                      --int[4]
@@ -343,7 +338,6 @@ function love.draw()
     local SN = sinLookUp[player.angle] --float
     local cycles = 1                   --int
 
-    push:start()
 
     --order sectors by distance
     local st --sector
@@ -449,20 +443,23 @@ function love.draw()
             sectors[s].d = math.floor(sectors[s].d / (sectors[s].we - sectors[s].ws)) --average sector distances
         end
     end
-    push:finish()
-
+    
     local cur_time = love.timer.getTime()
     if next_time <= cur_time then
         next_time = cur_time
         return
     end
     love.timer.sleep(next_time - cur_time)
+    push:finish()
 end
 
 function love.keypressed(key)
-    if key == 'space' then
+    if key == 'escape' then
         love.event.quit()
     end
+    if key == 'space' then
+        love.event.quit("restart")
+      end
 
     if key == 'r' then
         player.x = 433.63808305561
@@ -473,10 +470,7 @@ function love.keypressed(key)
     end
 
     if key == 't' then
-        print("x: " ..
-            player.x ..
-            " " ..
-            "y: " .. player.y .. " " .. "z: " .. player.z .. " " .. "a: " .. player.angle .. " " .. "l: " .. player.look)
+        print("x: " .. player.x .. " " .. "y: " .. player.y .. " " .. "z: " .. player.z .. " " .. "a: " .. player.angle .. " " .. "l: " .. player.look)
     end
 
     if key == 'g' then

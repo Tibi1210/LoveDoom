@@ -1,17 +1,17 @@
-local res = 8
+local res = 4
 
 SW = 160
 SH = 120
-WW = 160 * res
-WH = 120 * res
-SW2 = (SW / 2)
-SH2 = (SH / 2)
+WW = SW * res
+WH = SH * res
+SW2 = math.floor(SW / 2)
+SH2 = math.floor(SH / 2)
 
 function love.conf(t)
     t.window.title = "LoveDoom"
 
-    t.window.height = SH
-    t.window.width = SW
+    t.window.height = WH
+    t.window.width = WW
     t.window.resizable = false
 
     t.console = true
